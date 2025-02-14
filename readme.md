@@ -1,4 +1,4 @@
-# Why Masking Diffusion Works: Condition on the Jump \\ Schedule for Improved Discrete Diffusion
+# Why Masking Diffusion Works: Condition on the Jump Schedule for Improved Discrete Diffusion
 
 [Alan N Amin](https://alannawzadamin.github.io), [Nate Gruver](https://ngruver.github.io), [Andrew Gordon Wilson](https://cims.nyu.edu/~andrewgw/).
 
