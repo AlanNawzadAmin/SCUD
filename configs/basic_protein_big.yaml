@@ -1,0 +1,44 @@
+data:
+    data: uniref50
+    N: 31
+    conditional: false
+
+model:
+    seed: 0
+    model: ScheduleCondition
+    gamma: 0
+    schedule_type: mutual_information
+    forward_kwargs:
+        type: blosum
+        normalized: true
+        beta: 1
+        alpha: 1
+        make_sym: false
+    hybrid_loss_coeff: 0.0
+    logistic_pars: false
+    fix_x_t_bias: false
+    n_T: 500
+    t_max: 0.999
+    input_logits: false
+    sedd_param: false
+    eff_num_classes: 1000000
+    restart: false
+
+architecture:
+    s_dim: 128
+    nn_params:
+        n_layer: 56
+        d_model: 1280
+        slim: False
+    x0_model_class: ConvNew
+
+train:
+    batch_size: 64
+    n_epoch: 1
+    lr: 0.0001
+    grad_clip_val: 1
+    weight_decay: 0
+    gen_trans_step: 2000
+    accumulate: 2
+    ema: false
+    pack: true
