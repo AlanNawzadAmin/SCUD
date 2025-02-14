@@ -8,7 +8,7 @@ from .schedule_sample import sample_n_transitions_cont
 from d3pm_sc.ct_sched_cond import ScheduleCondition
 
 
-class MaskingDiffusion(ScheduleCondition): #schedule conditioning is True!
+class MaskingDiffusion(ScheduleCondition):
     def __init__(
         self,
         x0_model_class,
@@ -36,19 +36,17 @@ class MaskingDiffusion(ScheduleCondition): #schedule conditioning is True!
         # so we always assume S==1.
         # in principle we could also speed up sampling by ignoring S>1
 
-    def base_predict(self, x_t, t, cond, S):
+    def base_predict(self, x_t, t, attn_mask, S):
         masked_pos = S > 0
         masked_x_t = torch.where(masked_pos, self.num_classes, x_t)
-        if cond.sum() > 0 and torch.all(cond <= 1):
-            attn_mask = cond # don't mask already masked pos
-            masked_x_t = torch.where(attn_mask==1, masked_x_t, x_t) 
-        return self.x0_model(masked_x_t, t, cond, S=S)[..., :-1]
+        masked_x_t = torch.where(attn_mask==1, masked_x_t, x_t) # don't mask pos that are already masked
+        return self.x0_model(masked_x_t, t, attn_mask, S=S)[..., :-1]
     
-    def forward(self, x: torch.Tensor, cond: torch.Tensor = None, attn_mask: torch.Tensor = None) -> torch.Tensor:
+    def forward(self, x, attn_mask=None):
         t, S, x_t = self.sample_point(x, attn_mask)
         S = (S>0).long()
         # predict x_0 and prev(x_t)
-        predicted_x0_logits = self.model_predict(x_t, t, cond if cond is not None else attn_mask, S).float()
+        predicted_x0_logits = self.model_predict(x_t, t, attn_mask, S).float()
         true_q_posterior_logits = self.q_posterior_logits(x, x_t, t, S)
         pred_q_posterior_logits = self.q_posterior_logits(predicted_x0_logits, x_t, t, S)
 
@@ -77,7 +75,7 @@ class MaskingDiffusion(ScheduleCondition): #schedule conditioning is True!
             "ce_loss": ce_loss.detach().item(),
         }
 
-    def sample_sequence(self, x, cond=None, attn_mask=None, n_T=200, stride=10):
+    def sample_sequence(self, x, attn_mask=None, n_T=200, stride=10):
         t = self.t_max * torch.ones(x.shape[0], device=x.device)
         t = t * 0 + 1e-6
         S = (1. + 0. * x).long() # this is the only line changed
@@ -90,7 +88,7 @@ class MaskingDiffusion(ScheduleCondition): #schedule conditioning is True!
         while S.sum() > 0:
             # predict what comes next
             x_next = self.p_sample(
-                x, t, cond, attn_mask, torch.rand((*x.shape, self.num_classes), device=x.device), S, temperature=1
+                x, t, attn_mask, torch.rand((*x.shape, self.num_classes), device=x.device), S, temperature=1
             )
             for b in range(len(x)):
                 trans_indices = torch.argwhere(S[b] > 0)

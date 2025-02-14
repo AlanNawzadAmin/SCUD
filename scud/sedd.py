@@ -9,7 +9,7 @@ from .utils import kls, convert_to_probs, get_inf_gen
 from .schedule_sample import sample_n_transitions_cont
 from .continuous_time_diffusion import ContinuousTimeDiffusion
 
-class SEDD(ContinuousTimeDiffusion): #schedule conditioning is True!
+class SEDD(ContinuousTimeDiffusion):
     def __init__(
         self,
         x0_model_class,
@@ -100,11 +100,11 @@ class SEDD(ContinuousTimeDiffusion): #schedule conditioning is True!
         bwd_inf_gen.scatter_(-1, x_t.unsqueeze(-1), 0) # set diag to 0
         return bwd_inf_gen
 
-    def forward(self, x: torch.Tensor, cond: torch.Tensor = None, attn_mask=None, *args) -> torch.Tensor:
+    def forward(self, x: torch.Tensor,attn_mask=None, *args) -> torch.Tensor:
         t, _, x_t = self.sample_point(x, attn_mask)
         # print("av S:", S.float().mean())
         # predict x_0 and prev(x_t)
-        predicted_x0_logits = self.model_predict(x_t, t, cond if cond is not None else attn_mask, None).to(torch.float32)
+        predicted_x0_logits = self.model_predict(x_t, t, attn_mask, None).to(torch.float32)
         true_r_posterior = self.r_posterior(x, x_t, t, None)
         pred_r_posterior = self.r_posterior(predicted_x0_logits, x_t, t, None)
 
@@ -134,9 +134,9 @@ class SEDD(ContinuousTimeDiffusion): #schedule conditioning is True!
         }
 
     
-    def p_sample(self, x, t, cond, attn_mask, noise, delta_t, S=None, temperature=1):
+    def p_sample(self, x, t, attn_mask, noise, delta_t, S=None, temperature=1):
         # predict prev(x_t) or x_{t-1}
-        predicted_x0_logits = self.model_predict(x, t, cond if cond is not None else attn_mask,None)/temperature
+        predicted_x0_logits = self.model_predict(x, t, attn_mask, None)/temperature
         bwd_inf_gen = self.r_posterior(predicted_x0_logits, x, t, None)
         bwd_inf_gen.scatter_(-1, x.unsqueeze(-1), 0)
         bwd_inf_gen.scatter_(-1, x.unsqueeze(-1), - bwd_inf_gen.sum(-1).unsqueeze(-1))
@@ -152,7 +152,7 @@ class SEDD(ContinuousTimeDiffusion): #schedule conditioning is True!
         return sample
 
 
-    def sample_sequence(self, x, cond=None, attn_mask=None, n_T=200, stride=10):
+    def sample_sequence(self, x, attn_mask=None, n_T=200, stride=10):
         n_T = 1
         steps = 0 ## TODO fix sampling when there are masks
         images = []
@@ -160,7 +160,7 @@ class SEDD(ContinuousTimeDiffusion): #schedule conditioning is True!
         for t in pbar:
             t = torch.tensor([t] * x.shape[0], device=x.device)
             x_next = self.p_sample(
-                x, t, cond, attn_mask, torch.rand((*x.shape, self.num_classes), device=x.device), 1/n_T
+                x, t, attn_mask, torch.rand((*x.shape, self.num_classes), device=x.device), 1/n_T
             )
             x = x_next
 

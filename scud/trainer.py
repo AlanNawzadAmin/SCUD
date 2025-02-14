@@ -14,7 +14,6 @@ from pytorch_lightning.utilities import rank_zero_only
 
 def get_gif(sample_x, sample_a, model, gen_trans_step, batch_size):
     # save images
-    cond = None#torch.arange(0, batch_size).to(sample_x.device) % 10
     p = model.get_stationary()
     samples = torch.multinomial(p, num_samples=batch_size*sample_x.shape[1:].numel(), replacement=True)
     init_noise = samples.reshape((batch_size,)+sample_x.shape[1:]).to(sample_x.device)
@@ -23,7 +22,7 @@ def get_gif(sample_x, sample_a, model, gen_trans_step, batch_size):
     else:
         attn_mask = None
     images = model.sample_sequence(
-        init_noise, cond, attn_mask, stride=3, n_T=gen_trans_step,
+        init_noise, attn_mask, stride=3, n_T=gen_trans_step,
     )
     if images is not None:
         # image sequences to gif
@@ -52,7 +51,6 @@ def get_gif(sample_x, sample_a, model, gen_trans_step, batch_size):
 
 def get_text(sample_x, sample_a, model, gen_trans_step, batch_size, tokenizer):
     # save images
-    cond = None
     p = model.get_stationary()
     samples = torch.multinomial(p, num_samples=batch_size*sample_x.shape[1:].numel(), replacement=True)
     init_noise = samples.reshape((batch_size,)+sample_x.shape[1:]).to(sample_x.device)
@@ -61,7 +59,7 @@ def get_text(sample_x, sample_a, model, gen_trans_step, batch_size, tokenizer):
     else:
         attn_mask = None
     tokens = model.sample_sequence(
-        init_noise, cond, attn_mask, stride=3, n_T=gen_trans_step,
+        init_noise, attn_mask, stride=3, n_T=gen_trans_step,
     )
     if tokens is not None:
         last_token = tokens[-1]
@@ -127,19 +125,15 @@ class DiffusionTrainer(pl.LightningModule):
         self.p0 = p0
         # self.register_buffer("p0", p0)
 
-    def training_step(self, batch, batch_idx):
-        if isinstance(batch, tuple): #image datasets
-            x, cond = batch
-            attn_mask = None
-            if cond is not None:
-                if cond.dim() == x.dim(): #protein datasets
-                    attn_mask = cond
-                    cond = None
+    def training_step(self, batch, batch_idx):   
+        if isinstance(batch, tuple): #protein datasets
+            x, attn_mask = batch
         elif isinstance(batch, dict): #text datasets
             x, attn_mask = batch['input_ids'], batch['attention_mask']
-            cond = batch['cond'] if 'cond' in batch else None
-        # x, cond = x.to(device), cond.to(device)
-        loss, info = self(x, cond, attn_mask)
+        else: #image datasets
+            x = batch
+            attn_mask = None
+        loss, info = self(x, attn_mask)
         if self.sample_x is None:
             self.sample_x = x[:1]
             self.sample_a = None if attn_mask is None else attn_mask[:1]
@@ -152,19 +146,15 @@ class DiffusionTrainer(pl.LightningModule):
         return loss
 
     def validation_step(self, batch, batch_idx):        
-        if isinstance(batch, tuple): #image datasets
-            x, cond = batch
-            attn_mask = None
-            if cond is not None:
-                if cond.dim() == x.dim(): #protein datasets
-                    attn_mask = cond
-                    cond = None
+        if isinstance(batch, tuple): #protein datasets
+            x, attn_mask = batch
         elif isinstance(batch, dict): #text datasets
             x, attn_mask = batch['input_ids'], batch['attention_mask']
-            cond = batch['cond'] if 'cond' in batch else None
+        else: #image datasets
+            x = batch
+            attn_mask = None
 
-        # x, cond = x.to(device), cond.to(device)
-        loss, info = self(x, cond, attn_mask)
+        loss, info = self(x, attn_mask)
         print(info['vb_loss'], self.get_kl_t1(x).detach().item())
         self.log('val_l01', info['vb_loss'], on_step=False, on_epoch=True, sync_dist=True)
         self.log('val_l1', self.get_kl_t1(x).detach().item(), on_step=False, on_epoch=True, sync_dist=True)

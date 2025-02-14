@@ -10,7 +10,7 @@ from .utils import kls, convert_to_probs, get_inf_gen, sample_index_S
 from .schedule_sample import sample_n_transitions_cont
 from .continuous_time_diffusion import ContinuousTimeDiffusion
 
-class ScheduleCondition(ContinuousTimeDiffusion): #schedule conditioning is True!
+class ScheduleCondition(ContinuousTimeDiffusion):
     def __init__(
         self,
         x0_model_class,
@@ -106,10 +106,10 @@ class ScheduleCondition(ContinuousTimeDiffusion): #schedule conditioning is True
         else:
             return fact1 * fact2
 
-    def forward(self, x: torch.Tensor, cond: torch.Tensor = None, attn_mask=None,) -> torch.Tensor:
+    def forward(self, x, attn_mask=None,):
         t, S, x_t = self.sample_point(x, attn_mask)
         # predict x_0 and prev(x_t)
-        predicted_x0_logits = self.model_predict(x_t, t, cond if cond is not None else attn_mask, S).to(torch.float32)
+        predicted_x0_logits = self.model_predict(x_t, t, attn_mask, S).to(torch.float32)
         true_q_posterior_logits = self.q_posterior_logits(x, x_t, t, S)
         pred_q_posterior_logits = self.q_posterior_logits(predicted_x0_logits, x_t, t, S)
         # get kls and loss
@@ -137,9 +137,9 @@ class ScheduleCondition(ContinuousTimeDiffusion): #schedule conditioning is True
         }
 
     
-    def p_sample(self, x, t, cond, attn_mask, noise, S=None, k=1, temperature=1):
+    def p_sample(self, x, t, attn_mask, noise, S=None, k=1, temperature=1):
         # predict prev(x_t) or x_{t-1}
-        predicted_x0_logits = self.model_predict(x, t, cond if cond is not None else attn_mask, S) / temperature
+        predicted_x0_logits = self.model_predict(x, t, attn_mask, S) / temperature
         pred_q_posterior_logits = self.q_posterior_logits(predicted_x0_logits, x, t, S, k=k, log=False)
         # sample
         noise = torch.clip(noise, self.eps, 1.0)
@@ -149,9 +149,9 @@ class ScheduleCondition(ContinuousTimeDiffusion): #schedule conditioning is True
         )
         return sample
 
-    def corrector_sample(self, x, t, cond, attn_mask, noise, S=None, k=1, temperature=1):
+    def corrector_sample(self, x, t, attn_mask, noise, S=None, k=1, temperature=1):
         # predict prev(x_t) or x_{t-1}
-        predicted_x0_logits = self.model_predict(x, t, cond if cond is not None else attn_mask, S) / temperature
+        predicted_x0_logits = self.model_predict(x, t, attn_mask, S) / temperature
         pred_q_posterior_logits = self.q_posterior_logits(predicted_x0_logits, x, t, S, k=k, log=False)
         # K'_x,.K_.,. denoises and then renoises immediately
         sample_logits = torch.einsum('...i,...ij->...j',pred_q_posterior_logits, self.K_powers[k])
@@ -161,7 +161,7 @@ class ScheduleCondition(ContinuousTimeDiffusion): #schedule conditioning is True
         sample = torch.argmax(sample_logits * gumbel_noise, dim=-1)
         return sample
     
-    def sample_sequence(self, x, cond=None, attn_mask=None, n_T=200, stride=10,
+    def sample_sequence(self, x, attn_mask=None, n_T=200, stride=10,
                         n_corrector_steps=10, temperature=1, use_tau=False):
         t = self.t_max * torch.ones(x.shape[0], device=x.device)
         S = sample_n_transitions_cont(self.log_alpha, x[0].flatten().shape[0], t)
@@ -213,14 +213,14 @@ class ScheduleCondition(ContinuousTimeDiffusion): #schedule conditioning is True
 
             # predict what comes next
             x = self.p_sample(
-                x, t, cond, attn_mask,
+                x, t, attn_mask,
                 torch.rand((*x.shape, self.num_classes), device=x.device),
                 S, k=k, temperature=temperature,
             )
             assert torch.all(S_temp <= S)
             S = S_temp
             for l in range(n_corrector_steps):
-                x = self.corrector_sample(x, t, cond, attn_mask,
+                x = self.corrector_sample(x, t, attn_mask,
                     torch.rand((*x.shape, self.num_classes), device=x.device),
                     S, k=torch.minimum(S, torch.tensor(trans_corrector_k)), temperature=temperature,
                 )

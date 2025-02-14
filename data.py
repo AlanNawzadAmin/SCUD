@@ -727,10 +727,8 @@ def get_img_dataloaders(cfg):
     def collate_fn(batch):
         x, cond = zip(*batch)
         x = torch.stack(x)
-        cond = torch.tensor(cond)
-        cond = cond * cfg.data.conditional
         x = (x * (cfg.data.N - 1)).round().long().clamp(0, cfg.data.N - 1)
-        return x, cond
+        return x
     
     # train_size = int(len(full_dataset) * 0.9)
     # train_dataset, test_dataset = random_split(full_dataset, [train_size, len(full_dataset) - train_size])

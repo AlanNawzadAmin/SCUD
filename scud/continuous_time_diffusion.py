@@ -25,7 +25,7 @@ def get_betas(schedule_type):
         return get_a_b_func_mi
     return get_funcs
 
-class ContinuousTimeDiffusion(DiffusionTrainer): #schedule conditioning is True!
+class ContinuousTimeDiffusion(DiffusionTrainer):
     def __init__(
         self,
         x0_model_class,
@@ -53,11 +53,11 @@ class ContinuousTimeDiffusion(DiffusionTrainer): #schedule conditioning is True!
     def get_stationary(self):
         raise NotImplementedError
 
-    def base_predict(self, x_t, t, cond, S=None):
-        return self.x0_model(x_t, t, cond, S).to(torch.float32)
+    def base_predict(self, x_t, t, attn_mask, S=None):
+        return self.x0_model(x_t, t, attn_mask, S).to(torch.float32)
 
-    def model_predict(self, x_t, t, cond, S=None):
-        pred = self.base_predict(x_t, t, cond, S)
+    def model_predict(self, x_t, t, attn_mask, S=None):
+        pred = self.base_predict(x_t, t, attn_mask, S)
         if not self.logistic_pars:
             return pred
         else:

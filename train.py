@@ -21,11 +21,8 @@ import pytorch_lightning as pl
 from evodiff.utils import Tokenizer
 
 from d3pm_sc.ct_sched_cond import ScheduleCondition
-from d3pm_sc.ct_sched_cond_sparse_k import ScheduleConditionSparseK
 from d3pm_sc.masking_diffusion import MaskingDiffusion
 from d3pm_sc.sedd import SEDD
-from d3pm_sc.d3pm_classic import D3PMClassic
-from d3pm_sc.discrete_sc import DiscreteScheduleCondition
 
 from nets import get_model_setup
 from data import get_dataloaders
@@ -59,11 +56,8 @@ def train(cfg: DictConfig) -> None:
     
     ##### Pick model
     model_name_dict = {"ScheduleCondition":ScheduleCondition,
-                       "ScheduleConditionSparseK":ScheduleConditionSparseK,
                        "MaskingDiffusion":MaskingDiffusion,
-                       "SEDD": SEDD,
-                       "DiscreteScheduleCondition":DiscreteScheduleCondition,
-                       "D3PMClassic":D3PMClassic}
+                       "SEDD": SEDD,}
     using_lang = cfg.model.model == "ScheduleConditionSparseK"
     if not cfg.model.restart:
         model = model_name_dict[cfg.model.model](
