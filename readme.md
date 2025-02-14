@@ -22,4 +22,22 @@ Install dependencies by running ```pip install .``` with a recent version of Pyt
 
 ### Usage
 
-Get data? Training? Sampling?
+#### Data
+
+Running image or language models automatically installs the relevant data.
+To train protein models, you can download Uniref50 data from [here](https://zenodo.org/records/6564798). Place this data in ```data/uniref_2020/uniref50/```.
+
+#### Noise rate function
+
+We choose our function $\beta(t)$ to linearly decrease the mutual information in time.
+As described in the paper, this involves finding a zero using Newton's method, which can slow down training when there are too many states.
+Thus when there are $B>200$ states, we precompute the values $\beta(t)$ at a resulution of $10^{-6}$ and save them in ```data/save_alphas``` before begining training.
+Be sure to account for this taking up to an hour the first time you train on a new set of data (calculating this schedule for SEDD can take much longer).
+
+#### Training a model
+
+?
+
+#### Sampling from a model
+
+?

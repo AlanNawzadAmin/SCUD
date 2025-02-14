@@ -614,23 +614,6 @@ def get_text_dataloaders(
     valid_seed=None
 ):
   num_gpus = torch.cuda.device_count()
-#   assert (config.loader.global_batch_size
-#           == (config.loader.batch_size
-#               * config.trainer.num_nodes
-#               * num_gpus
-#               * config.trainer.accumulate_grad_batches))
-  
-#   if config.loader.global_batch_size % (
-#     num_gpus * config.trainer.accumulate_grad_batches) != 0:
-#     raise ValueError(
-#       f'Train Batch Size {config.training.batch_size}'
-#       f'not divisible by {num_gpus} gpus with accumulation '
-#       f'{config.trainer.accumulate_grad_batches}.')
-    
-#   if config.loader.eval_global_batch_size % num_gpus != 0:
-#     raise ValueError(
-#       f'Eval Batch Size for {config.eval.batch_size} '
-#       f'not divisible by {num_gpus}.')
     
   if skip_train:
     train_set = None
@@ -744,14 +727,15 @@ from sequence_models.datasets import UniRefDataset
 from evodiff.utils import Tokenizer
 from d3pm_sc.utils import _pad 
 import numpy as np
+
 def get_protein_dataloaders(cfg):
     batch_size = cfg.train.batch_size
 
     max_len = 1024
     tokenizer = Tokenizer()
     print("Getting Uniref.")
-    train_dataset = UniRefDataset('/scratch/aa11803/d3pm/data/uniref_2020/uniref50/', 'train', structure=False, max_len=max_len)
-    test_dataset = UniRefDataset('/scratch/aa11803/d3pm/data/uniref_2020/uniref50/', 'test', structure=False, max_len=max_len)
+    train_dataset = UniRefDataset('data/uniref_2020/uniref50/', 'train', structure=False, max_len=max_len)
+    test_dataset = UniRefDataset('data/uniref_2020/uniref50/', 'test', structure=False, max_len=max_len)
 
     def mask_pad(tokenized):
         masks = tokenized != tokenizer.pad_id

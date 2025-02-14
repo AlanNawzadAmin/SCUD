@@ -7,19 +7,12 @@ import hashlib
 import os
 
 def hash_matrix(matrix):
-    # Convert the matrix to a byte string
     byte_string = matrix.cpu().numpy().tobytes()
-    
-    # Create a hash object (using SHA-256 in this example)
     hash_object = hashlib.sha256()
-    
-    # Update the hash object with the byte string
     hash_object.update(byte_string)
-    
-    # Get the hexadecimal representation of the hash
     return hash_object.hexdigest()
 
-def try_load(func, fname, path='/scratch/aa11803/d3pm/save_alphas/'):
+def try_load(func, fname, path='data/save_alphas/'):
     if fname in os.listdir(path):
         print("Loading alphas. Note: I hope p0 is similar to before!")
         val = np.load(path+fname)
@@ -63,7 +56,7 @@ def get_a_b_func_cont(L, p0, **kwargs):
         # out = root_finder(mi, 0, 20/second_eval, ts)
         return -torch.where(out>1e-8, out, 1e-8)
     hash_mat = hash_matrix(L)
-    if N > 100:
+    if N > 200:
         try_load(lambda : L, f'{hash_mat}_mat.npy')
         base_alphas = try_load(lambda: -log_alpha_naive(base_ts), f'{hash_mat}.npy')
     else:
@@ -71,10 +64,7 @@ def get_a_b_func_cont(L, p0, **kwargs):
     def log_alpha(ts):
         closest_index = torch.searchsorted(base_ts, ts.to('cpu'))
         best_guess_l = base_alphas[closest_index]
-        # best_guess_u = base_alphas[closest_index]
-        # out = newton_root_finder(mi, best_guess_l, ts.to('cpu'))
         out = best_guess_l
-        # out = root_finder(mi, best_guess_l, best_guess_u, ts)
         return -torch.where(out>1e-8, out, 1e-8).to(ts.device).to(ts.dtype)
     
     def naive_beta(ts, bs=10000):
@@ -133,7 +123,7 @@ def get_a_b_func_sc(K, p0, precompute_mis=None, second_eval=None, **kwargs):
         out = newton_root_finder(mi, max_n/20, ts.double())
         return -torch.where(out>1e-6, out, 1e-6).float()
     hash_mat = hash_matrix(K)
-    if len(K) > 100:
+    if len(K) > 200:
         try_load(lambda : K, f'{hash_mat}_mat.npy')
         base_alphas = try_load(lambda: -log_alpha_naive(base_ts), f'scud_{hash_mat}.npy')
     else:
