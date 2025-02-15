@@ -16,10 +16,6 @@ This codebase implements schedule-conditioned diffusion (**SCUD**).
 
 Install dependencies by running ```pip install .``` with a recent version of Python.
 
-### Pretrained models
-
-?
-
 ### Usage
 
 #### Data
