@@ -10,7 +10,7 @@ from .utils import kls, convert_to_probs, get_inf_gen, sample_index_S
 from .schedule_sample import sample_n_transitions_cont
 from .continuous_time_diffusion import ContinuousTimeDiffusion
 
-class ScheduleCondition(ContinuousTimeDiffusion):
+class SCUD(ContinuousTimeDiffusion):
     def __init__(
         self,
         x0_model_class,
@@ -19,17 +19,12 @@ class ScheduleCondition(ContinuousTimeDiffusion):
         forward_kwargs={"type":"uniform"},
         schedule_type="cos",
         gamma=0,
-        hybrid_loss_coeff=0.01,
-        fix_x_t_bias=False,
         logistic_pars=False,
-        input_logits=False,
         **kwargs
     ):
         # Precalculate betas, define model_predict, p_sample
-        super().__init__(x0_model_class, nn_params, num_classes, schedule_type, hybrid_loss_coeff, logistic_pars, **kwargs)
+        super().__init__(x0_model_class, nn_params, num_classes, schedule_type, logistic_pars, **kwargs)
         self.save_hyperparameters(ignore=['x0_model_class'])
-        self.fix_x_t_bias = fix_x_t_bias
-        self.input_logits = input_logits
         assert gamma >= 0 and gamma < 1 # full schedule and classical resp.
 
         # Precalculate Ls
@@ -131,7 +126,7 @@ class ScheduleCondition(ContinuousTimeDiffusion):
         else:
             ce_loss = ce_loss.mean()
 
-        return self.hybrid_loss_coeff * ce_loss + vb_loss, {
+        return vb_loss, {
             "vb_loss": vb_loss.detach().item(),
             "ce_loss": ce_loss.detach().item(),
         }

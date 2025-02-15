@@ -20,9 +20,9 @@ import pytorch_lightning as pl
 
 from evodiff.utils import Tokenizer
 
-from d3pm_sc.ct_sched_cond import ScheduleCondition
+from d3pm_sc.scud import SCUD
 from d3pm_sc.masking_diffusion import MaskingDiffusion
-from d3pm_sc.sedd import SEDD
+from d3pm_sc.classical_diffusion import ClassicalDiffusion
 
 from nets import get_model_setup
 from data import get_dataloaders
@@ -55,27 +55,21 @@ def train(cfg: DictConfig) -> None:
     print(cfg)
     
     ##### Pick model
-    model_name_dict = {"ScheduleCondition":ScheduleCondition,
-                       "MaskingDiffusion":MaskingDiffusion,
-                       "SEDD": SEDD,}
-    using_lang = cfg.model.model == "ScheduleConditionSparseK"
+    model_name_dict = {"SCUD":SCUD,
+                       "Masking":MaskingDiffusion,
+                       "Classical": ClassicalDiffusion,}
     if not cfg.model.restart:
         model = model_name_dict[cfg.model.model](
             x0_model_class,
             nn_params,
             num_classes=len(tokenizer) if tokenizer else cfg.data.N,
-            hybrid_loss_coeff=cfg.model.hybrid_loss_coeff,
             gamma=cfg.model.gamma,
             forward_kwargs=OmegaConf.to_container(cfg.model.forward_kwargs, resolve=True),
             schedule_type=cfg.model.schedule_type,
             logistic_pars=cfg.model.logistic_pars,
-            fix_x_t_bias=cfg.model.fix_x_t_bias,
-            n_T=cfg.model.n_T,
+            gen_trans_step=cfg.sampling.gen_trans_step,
             t_max=cfg.model.t_max,
             seed=cfg.model.seed,
-            sedd_param=cfg.model.sedd_param,
-            eff_num_classes=cfg.model.eff_num_classes,
-            input_logits=cfg.model.input_logits,
             tokenizer=tokenizer if cfg.data.data != 'uniref50' else Tokenizer(),
             **OmegaConf.to_container(cfg.train, resolve=True),
         )
@@ -102,13 +96,12 @@ def train(cfg: DictConfig) -> None:
         val_check_interval = 2 * (210000//cfg.train.batch_size)
     else:
         val_check_interval = 1.0
-    print("broadcast buffer:", not using_lang)
     trainer = Trainer(
         max_epochs=cfg.train.n_epoch, 
         accelerator='auto', 
         devices=torch.cuda.device_count(), 
         logger=wandb_logger, 
-        strategy=DDPStrategy(broadcast_buffers=not using_lang),
+        strategy=DDPStrategy(broadcast_buffers=True),
         callbacks=([EMA(0.9999)] * cfg.train.ema
                    +[ModelCheckpoint(dirpath=f'checkpoints/{wandb_logger.experiment.name}',
                                    save_on_train_epoch_end=False)]),

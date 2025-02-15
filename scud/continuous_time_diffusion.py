@@ -32,7 +32,6 @@ class ContinuousTimeDiffusion(DiffusionTrainer):
         nn_params,
         num_classes: int = 10,
         schedule_type="cos",
-        hybrid_loss_coeff=0.001,
         logistic_pars=False,
         t_max=0.999,
         **kwargs
@@ -41,7 +40,6 @@ class ContinuousTimeDiffusion(DiffusionTrainer):
         self.save_hyperparameters(ignore=['x0_model_class'])
         self.hparams.update(x0_model_class=x0_model_class.__name__)
         self.x0_model = x0_model_class(**nn_params)
-        self.hybrid_loss_coeff = hybrid_loss_coeff
         self.eps = 1e-9
         self.num_classes = num_classes
         self.t_max = t_max

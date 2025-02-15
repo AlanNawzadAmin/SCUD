@@ -1,25 +1,18 @@
 data:
     data: CIFAR10
-    N: 128
-    conditional: false
+    N: 64
 
 model:
     seed: 0
-    model: ScheduleCondition
+    model: SCUD
     gamma: 0
     schedule_type: mutual_information
     forward_kwargs:
         type: gaussian
         normalized: false
         bandwidth: 0.05
-    hybrid_loss_coeff: 0.0
     logistic_pars: true
-    fix_x_t_bias: false
-    n_T: 500
     t_max: 0.999
-    input_logits: false
-    sedd_param: false
-    eff_num_classes: 1000000
     restart: false
 
 architecture:
@@ -44,6 +37,8 @@ train:
     lr: 0.0002
     grad_clip_val: 1
     weight_decay: 0
-    gen_trans_step: 2000
     accumulate: 1
     ema: false
+
+sampling:
+    gen_trans_step: 2048

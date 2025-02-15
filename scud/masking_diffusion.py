@@ -15,10 +15,7 @@ class MaskingDiffusion(ScheduleCondition):
         nn_params,
         num_classes: int = 10,
         schedule_type="cos",
-        hybrid_loss_coeff=0.01,
-        fix_x_t_bias=False,
         logistic_pars=False,
-        input_logits=False,
         **kwargs,
     ):
         forward_kwargs={"type":"uniform"}
@@ -27,8 +24,8 @@ class MaskingDiffusion(ScheduleCondition):
             del kwargs['gamma']
         if 'forward_kwargs' in kwargs:
             del kwargs['forward_kwargs']
-        super().__init__(x0_model_class, nn_params, num_classes, forward_kwargs, schedule_type, gamma, hybrid_loss_coeff,
-                         fix_x_t_bias, logistic_pars, input_logits, **kwargs)
+        super().__init__(x0_model_class, nn_params, num_classes, forward_kwargs, schedule_type, gamma,
+                         logistic_pars, **kwargs)
         self.use_bad_model_predict = ~ logistic_pars
         # with this choice, x_t_sample is uniform and 
         # q_posterior_logits returns uniform if S>1 and x_0 pred if S==1
@@ -70,7 +67,7 @@ class MaskingDiffusion(ScheduleCondition):
         else:
             ce_loss = ce_loss.mean()
 
-        return self.hybrid_loss_coeff * ce_loss + vb_loss, {
+        return vb_loss, {
             "vb_loss": vb_loss.detach().item(),
             "ce_loss": ce_loss.detach().item(),
         }

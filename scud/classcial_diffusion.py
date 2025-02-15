@@ -9,7 +9,7 @@ from .utils import kls, convert_to_probs, get_inf_gen
 from .schedule_sample import sample_n_transitions_cont
 from .continuous_time_diffusion import ContinuousTimeDiffusion
 
-class SEDD(ContinuousTimeDiffusion):
+class ClassicalDiffusion(ContinuousTimeDiffusion):
     def __init__(
         self,
         x0_model_class,
@@ -17,15 +17,12 @@ class SEDD(ContinuousTimeDiffusion):
         num_classes: int = 10,
         forward_kwargs={"type":"uniform"},
         schedule_type="cos",
-        hybrid_loss_coeff=0.01,
-        fix_x_t_bias=False,
         logistic_pars=False,
         **kwargs
     ):
         # Precalculate betas, define model_predict, p_sample
-        super().__init__(x0_model_class, nn_params, num_classes, schedule_type, hybrid_loss_coeff, logistic_pars, **kwargs)
+        super().__init__(x0_model_class, nn_params, num_classes, schedule_type, logistic_pars, **kwargs)
         self.save_hyperparameters(ignore=['x0_model_class'])
-        self.fix_x_t_bias = fix_x_t_bias
 
         # Get L
         L = get_inf_gen(forward_kwargs, num_classes)
@@ -128,7 +125,7 @@ class SEDD(ContinuousTimeDiffusion):
             ce_loss = (ce_loss * attn_mask.flatten()).sum() / attn_mask.sum()
         else:
             ce_loss = ce_loss.mean()
-        return self.hybrid_loss_coeff * ce_loss + vb_loss, {
+        return vb_loss, {
             "vb_loss": vb_loss.detach().item(),
             "ce_loss": ce_loss.detach().item(),
         }
