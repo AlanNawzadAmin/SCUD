@@ -99,48 +99,6 @@ def get_inf_gen(forward_kwargs, num_classes):
         L[range_, range_] = -L.sum(-1)
     return L
 
-def extract_sparse_csr_submatrix(csr_tensor, row_indices, col_indices):
-    # Convert to COO for easier manipulation
-    coo_tensor = csr_tensor.to_sparse_coo()
-    
-    # Convert input indices to tensors and sort them for efficient processing
-    row_indices = torch.as_tensor(row_indices, device=csr_tensor.device)
-    col_indices = torch.as_tensor(col_indices, device=csr_tensor.device)
-    sorted_row_indices, row_perm = torch.sort(row_indices)
-    sorted_col_indices, col_perm = torch.sort(col_indices)
-    
-    # Create boolean masks for rows and columns
-    row_mask = torch.zeros(csr_tensor.shape[0], dtype=torch.bool, device=csr_tensor.device)
-    col_mask = torch.zeros(csr_tensor.shape[1], dtype=torch.bool, device=csr_tensor.device)
-    row_mask[sorted_row_indices] = True
-    col_mask[sorted_col_indices] = True
-    
-    # Apply masks to get desired indices and values
-    mask = row_mask[coo_tensor.indices()[0]] & col_mask[coo_tensor.indices()[1]]
-    filtered_indices = coo_tensor.indices()[:, mask]
-    filtered_values = coo_tensor.values()[mask]
-    
-    # Remap row and column indices
-    row_map = torch.empty_like(row_mask, dtype=torch.long)
-    col_map = torch.empty_like(col_mask, dtype=torch.long)
-    row_map[sorted_row_indices] = torch.arange(len(row_indices), device=csr_tensor.device)
-    col_map[sorted_col_indices] = torch.arange(len(col_indices), device=csr_tensor.device)
-    
-    new_rows = row_map[filtered_indices[0]]
-    new_cols = col_map[filtered_indices[1]]
-    
-    # Reorder to match input order
-    new_rows = row_perm[new_rows]
-    new_cols = col_perm[new_cols]
-    
-    # Create new sparse tensor
-    new_indices = torch.stack([new_rows, new_cols])
-    new_shape = (len(row_indices), len(col_indices))
-    new_coo = torch.sparse_coo_tensor(new_indices, filtered_values, new_shape)
-    
-    # Convert back to CSR
-    return new_coo.to_sparse_csr()
-
 def get_sort_S(S):
     S_flat, sort = torch.sort(S.flatten(), descending=True)
     S_sort = S_flat.reshape(S.shape)
@@ -192,70 +150,13 @@ def sample_index_S(S):
     
     return sampled_index
 
-def sparse_zeros_like(K):
-    """
-    Creates a sparse tensor of zeros with same size, dtype, and layout as input tensor K.
-    
-    Args:
-        K (torch.Tensor): Input sparse tensor of any dimension
-        
-    Returns:
-        torch.Tensor: Sparse tensor of zeros with same properties as K
-    """
-    if K.layout == torch.sparse_coo:
-        return torch.sparse_coo_tensor(
-            indices=torch.empty((K.dim(), 0), dtype=torch.long, device=K.device),
-            values=torch.empty(0, dtype=K.dtype, device=K.device),
-            size=K.size(),
-            device=K.device
-        )
-    elif K.layout == torch.sparse_csr:
-        return torch.sparse_csr_tensor(
-            crow_indices=torch.zeros(K.size(0) + 1, dtype=torch.long, device=K.device),
-            col_indices=torch.empty(0, dtype=torch.long, device=K.device),
-            values=torch.empty(0, dtype=K.dtype, device=K.device),
-            size=K.size(),
-            device=K.device
-        )
-    elif K.layout == torch.sparse_csc:
-        return torch.sparse_csc_tensor(
-            ccol_indices=torch.zeros(K.size(1) + 1, dtype=torch.long, device=K.device),
-            row_indices=torch.empty(0, dtype=torch.long, device=K.device),
-            values=torch.empty(0, dtype=K.dtype, device=K.device),
-            size=K.size(),
-            device=K.device
-        )
-    else:
-        raise ValueError(f"Unsupported sparse layout: {K.layout}")
-
-def log1p(x: torch.Tensor) -> torch.Tensor:
-    """
-    Compute log(1 + x) in a numerically stable way, especially for x near -1.
-    
-    For x near -1, we use the identity:
-    log(1 + x) = log((1 + x)/(-x)) + log(-x)
-                = log(1 + 1/(-x - 1)) + log(-x)
-    
-    This avoids catastrophic cancellation when x ≈ -1.
-    
-    Args:
-        x: Input tensor
-    Returns:
-        log(1 + x) computed in a numerically stable way
-    """
-    # Use built-in implementation for x >= -0.7 as it's stable in this range
+def log1p(x):
     result = torch.log1p(x)
-    
-    # For x < -0.7, use our special case handling
     mask = x < -0.7
     if mask.any():
-        # Only process elements where x < -0.7
         x_neg = x[mask]
-        
-        # Compute log(1 + x) using the alternate form
         neg_x = -x_neg
         inv_xp1 = 1.0 / (neg_x - 1.0)
         result[mask] = torch.log1p(inv_xp1) + torch.log(neg_x)
-    
     return result
 
