@@ -8,7 +8,7 @@
 
 Masking discrete diffusion makes use of a fundamental difference between continuous and discrete Markov processes: discrete Markov processes evolve by discontinuous jumps at a fixed rate and, unlike other discrete diffusion models, masking diffusion *builds in the known distribution of jump times* and only learns where to jump to. We show that we can similarly bake in the known distribution of jump times into *any* discrete diffusion model. The resulting models -- schedule-conditioned diffusion (SCUD) -- generalize classical discrete diffusion and masking diffusion. By applying SCUD to models with noising processes that incorporate inductive biases on images, text, and protein data, we build diffusion models that outperform masking.
 
-This codebase implements schedule-conditioned diffusion (**SCUD**).
+This codebase implements schedule-conditioned diffusion (**SCUD**). We provide instructions to train models on image and protein data. We also include code to train masking diffusion or classical diffusion models.
 
 ----
 
