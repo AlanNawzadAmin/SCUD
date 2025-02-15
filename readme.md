@@ -16,24 +16,22 @@ This codebase implements schedule-conditioned diffusion (**SCUD**). We provide i
 
 Install dependencies by running ```pip install .``` with a recent version of Python.
 
-### Usage
+### Basic usage
 
-#### Data
+To train a small U-net on CIFAR10 with 64 states, run ```python3 train.py```.
 
-Running image or language models automatically installs the relevant data.
+#### Training protein models
+
 To train protein models, you can download Uniref50 data from [here](https://zenodo.org/records/6564798). Place this data in ```data/uniref_2020/uniref50/```.
+Then you can train a SCUD model with a small CARP architecture by running ```python3 train.py --config-name=basic_protein```.
 
-#### Noise rate function
+#### Other usage
+
+You can change the training parameters, noise rate function, forward process, and model by modifying the config file ```configs/basic.cfg```.
+
+#### Note on noise rate function
 
 We choose our function $\beta(t)$ to linearly decrease the mutual information in time.
 As described in the paper, this involves finding a zero using Newton's method, which can slow down training when there are too many states.
-Thus when there are $B>200$ states, we precompute the values $\beta(t)$ at a resulution of $10^{-6}$ and save them in ```data/save_alphas``` before begining training.
+Thus when there are $B>200$ states, we precompute the values $\beta(t)$ at a resolution of $10^{-6}$ and save them in ```data/save_alphas``` before begining training.
 Be sure to account for this taking up to an hour the first time you train on a new set of data (calculating this schedule for SEDD can take much longer).
-
-#### Training a model
-
-?
-
-#### Sampling from a model
-
-?
