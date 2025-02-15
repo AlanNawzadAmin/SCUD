@@ -31,7 +31,17 @@ Then you can train a SCUD model with a small CARP architecture by running ```pyt
 
 #### Other usage
 
-You can change the training parameters, noise rate function, forward process, and model by modifying the config file ```configs/basic.cfg```.
+You can change the hyperparameters of the model, and even train masking and classical discrete diffusion models by modifying the config file ```configs/basic.cfg```.
+To change the training parameters, modify the ```train``` parameters.
+To change the model architecture, modify ```architecture``` parameters.
+Changing ```data.N``` for image data changes the number of states in CIFAR images (up to 256).
+
+```model.model``` can be set to ```SCUD```, ```Masking```, or ```Classical```.
+```model.gamma``` controls the conditioning parameter $\gamma$ for SCUD.
+```model.schedule_type``` controls the noise rate function $\beta(t)$ and can be set to ```linear```, ```cos```, or our choice from the paper: ```mutual_information``` (note below for this choice).
+```model.forward_kwargs``` controls the forward process; note the ```get_inf_gen``` function in ```scud/utils.py``` for choices.
+```model.logistic_pars``` toggles the logistic parametersation for image data.
+Set ```model.restart``` to the folder of a checkpoint to restart training.
 
 #### Note on noise rate function
 
