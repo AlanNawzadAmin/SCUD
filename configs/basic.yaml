@@ -14,6 +14,7 @@ model:
     logistic_pars: true
     t_max: 0.999
     restart: false
+    n_T: 200
 
 architecture:
     s_dim: 128
