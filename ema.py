@@ -18,6 +18,7 @@ import copy
 import os
 import threading
 from typing import Any, Dict, Iterable
+import contextlib
 
 import pytorch_lightning as pl
 import torch

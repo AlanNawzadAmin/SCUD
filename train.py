@@ -20,9 +20,9 @@ import pytorch_lightning as pl
 
 from evodiff.utils import Tokenizer
 
-from d3pm_sc.scud import SCUD
-from d3pm_sc.masking_diffusion import MaskingDiffusion
-from d3pm_sc.classical_diffusion import ClassicalDiffusion
+from scud.scud import SCUD
+from scud.masking_diffusion import MaskingDiffusion
+from scud.classical_diffusion import ClassicalDiffusion
 
 from nets import get_model_setup
 from data import get_dataloaders

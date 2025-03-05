@@ -7,7 +7,7 @@ import pytorch_lightning as pl
 
 from .schedule_sample import sample_n_transitions, sample_full_transitions
 from .schedule_sample import sample_n_transitions_cont
-from d3pm_sc.mutual_info_schedule import get_a_b_func_mi
+from scud.mutual_info_schedule import get_a_b_func_mi
 
 def get_betas(schedule_type):
     if schedule_type in ['cos', 'linear']:
@@ -123,10 +123,10 @@ class ContinuousTimeDiffusion(DiffusionTrainer):
         hparams = checkpoint['hyper_parameters']
         
         # Get the x0_model_class
-        from d3pm_sc.unet import UNet, KingmaUNet, SimpleUNet, GigaUNet
-        from d3pm_sc.dit_vision import DiT_Llama
-        from d3pm_sc.dit_text import DIT
-        from d3pm_sc.protein_convnet import ByteNetLMTime
+        from scud.unet import UNet, KingmaUNet, SimpleUNet, GigaUNet
+        from scud.dit_vision import DiT_Llama
+        from scud.dit_text import DIT
+        from scud.protein_convnet import ByteNetLMTime
         x0_model_class = {
             "SimpleUNet":SimpleUNet,
             "KingmaUNet":KingmaUNet,

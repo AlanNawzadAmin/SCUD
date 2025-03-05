@@ -2,7 +2,7 @@ import torch
 import math
 import numpy as np
 from tqdm import tqdm
-from d3pm_sc.root_finder import root_finder, newton_root_finder
+from scud.root_finder import root_finder, newton_root_finder
 import hashlib
 import os
 

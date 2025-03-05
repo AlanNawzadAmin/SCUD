@@ -1,16 +1,13 @@
 
 from omegaconf import OmegaConf
 
-from d3pm_sc.unet import UNet, KingmaUNet, SimpleUNet, GigaUNet
-from d3pm_sc.dit_vision import DiT_Llama
-from d3pm_sc.dit_text import DIT
-from d3pm_sc.protein_convnet import ByteNetLMTime, ByteNetLMTimeNew
+from scud.unet import KingmaUNet
+from scud.dit_vision import DiT_Llama
+from scud.dit_text import DIT
+from scud.protein_convnet import ByteNetLMTimeNew
 
 image_nn_name_dict = {
-    "SimpleUNet":SimpleUNet,
     "KingmaUNet":KingmaUNet,
-    "UNet":UNet,
-    "GigaUNet":GigaUNet,
     "DiT_Llama":DiT_Llama
 }
 
@@ -19,7 +16,6 @@ text_nn_name_dict = {
 }
 
 protein_nn_name_dict = {
-    "Conv": ByteNetLMTime,
     "ConvNew": ByteNetLMTimeNew
 }
 

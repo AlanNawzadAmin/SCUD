@@ -725,7 +725,7 @@ def get_img_dataloaders(cfg):
 
 from sequence_models.datasets import UniRefDataset
 from evodiff.utils import Tokenizer
-from d3pm_sc.utils import _pad 
+from scud.utils import _pad 
 import numpy as np
 
 def get_protein_dataloaders(cfg):
