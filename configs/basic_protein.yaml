@@ -4,7 +4,7 @@ data:
 
 model:
     seed: 0
-    model: ScheduleCondition
+    model: SCUD
     gamma: 0
     schedule_type: mutual_information
     forward_kwargs:
