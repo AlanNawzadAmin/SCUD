@@ -2,13 +2,11 @@
 from omegaconf import OmegaConf
 
 from scud.unet import KingmaUNet
-from scud.dit_vision import DiT_Llama
 from scud.dit_text import DIT
 from scud.protein_convnet import ByteNetLMTimeNew
 
 image_nn_name_dict = {
     "KingmaUNet":KingmaUNet,
-    "DiT_Llama":DiT_Llama
 }
 
 text_nn_name_dict = {
@@ -22,7 +20,7 @@ protein_nn_name_dict = {
 def get_model_setup(cfg, tokenizer=None):
     schedule_conditioning = cfg.model.model in [
         "ScheduleCondition", "DiscreteScheduleCondition",
-        "ScheduleConditionSparseK", "MaskingDiffusion",
+        "MaskingDiffusion",
     ]
     nn_params = cfg.architecture.nn_params
     nn_params = (OmegaConf.to_container(nn_params, resolve=True)
