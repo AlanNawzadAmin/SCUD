@@ -48,4 +48,4 @@ Set ```model.restart``` to the folder of a checkpoint to restart training.
 We choose our function $\beta(t)$ to linearly decrease the mutual information in time.
 As described in the paper, this involves finding a zero using Newton's method, which can slow down training when there are too many states.
 Thus when there are $B>200$ states, we precompute the values $\beta(t)$ at a resolution of $10^{-6}$ and save them in ```data/save_alphas``` before begining training.
-Be sure to account for this taking up to an hour the first time you train on a new set of data (calculating this schedule for SEDD can take much longer).
+Be sure to account for this taking up to an hour the first time you train on a new set of data (calculating this schedule for classical discrete diffusion can take much longer).
