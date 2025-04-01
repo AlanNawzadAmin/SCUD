@@ -9,10 +9,6 @@ image_nn_name_dict = {
     "KingmaUNet":KingmaUNet,
 }
 
-text_nn_name_dict = {
-    "DIT": DIT
-}
-
 protein_nn_name_dict = {
     "ConvNew": ByteNetLMTimeNew
 }
