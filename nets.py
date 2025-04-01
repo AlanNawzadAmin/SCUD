@@ -2,7 +2,6 @@
 from omegaconf import OmegaConf
 
 from scud.unet import KingmaUNet
-from scud.dit_text import DIT
 from scud.protein_convnet import ByteNetLMTimeNew
 
 image_nn_name_dict = {
