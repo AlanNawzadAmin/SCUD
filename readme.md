@@ -1,8 +1,6 @@
 # Why Masking Diffusion Works: Condition on the Jump Schedule for Improved Discrete Diffusion
 
-<p align="center">
-  <img width="321" alt="concept" src="https://github.com/user-attachments/assets/769d0dc3-08b6-446a-a80c-966b12de783d" />
-</p>
+[concept fig.pdf](https://github.com/user-attachments/files/20124861/concept.fig.pdf)
 
 ### Description
 
