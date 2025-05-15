@@ -37,8 +37,6 @@ os.environ["SSL_CERT_FILE"] = certifi.where()
 def train(cfg: DictConfig) -> None:
     @rank_zero_only
     def init_wandb():
-        wandb_key = "9e61d229e6b9dbfef3e2199c7e093a75bfe53135" if 'nvg' \
-            in getpass.getuser() else "6a47f093d2a55e4f4e85b33767423f2db66355b8"
         wandb.login()
         wandb.init()
     init_wandb()
