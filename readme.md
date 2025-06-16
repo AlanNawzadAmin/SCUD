@@ -2,7 +2,7 @@
 
 [Alan N Amin](https://alannawzadamin.github.io), [Nate Gruver](https://ngruver.github.io), [Andrew Gordon Wilson](https://cims.nyu.edu/~andrewgw/).
 
-[Paper on arXiv soon].<!--Presenting at ? workshop at ICLR 2025.-->
+[Paper](https://arxiv.org/abs/2506.08316)
 
 <p align="center">
   <img width="321" alt="concept" src="https://github.com/user-attachments/assets/40daf76e-8381-4986-b8f9-fc9d93571bf9" />
