@@ -27,6 +27,7 @@ To train a small U-net on CIFAR10 with 64 states, run ```python3 train.py```.
 #### Training protein models
 
 To train protein models, you can download Uniref50 data from [here](https://zenodo.org/records/6564798). Place this data in ```data/uniref_2020/uniref50/```.
+Also download the BLOSUM62 matrix from [here](https://github.com/microsoft/evodiff/blob/main/data/blosum62-special-MSA.mat) and place it in ```data/blosum62-special-MSA.mat```.
 Then you can train a SCUD model with a small CARP architecture by running ```python3 train.py --config-name=basic_protein```.
 
 #### Other usage
