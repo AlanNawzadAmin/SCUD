@@ -5,10 +5,10 @@ from tqdm import tqdm
 
 from .utils import kls, convert_to_distribution
 from .schedule_sample import sample_n_transitions_cont
-from scud.ct_sched_cond import ScheduleCondition
+from scud.scud import SCUD
 
 
-class MaskingDiffusion(ScheduleCondition):
+class MaskingDiffusion(SCUD):
     def __init__(
         self,
         x0_model_class,
