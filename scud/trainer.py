@@ -9,7 +9,7 @@ from PIL import Image
 from torchvision.utils import make_grid
 import torch.nn.functional as F
 from tqdm import tqdm
-from .inception_score import inception_score
+#from .inception_score import inception_score
 from pytorch_lightning.utilities import rank_zero_only
 
 def get_gif(sample_x, sample_a, model, gen_trans_step, batch_size):
