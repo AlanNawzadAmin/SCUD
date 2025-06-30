@@ -31,20 +31,6 @@ def get_model_setup(cfg, tokenizer=None):
         }
     
         return image_nn_name_dict[cfg.architecture.x0_model_class], nn_params
-    
-    elif cfg.architecture.x0_model_class in text_nn_name_dict:        
-        nn_params["n_T"] = cfg.model.n_T
-        nn_params["s_dim"] = cfg.architecture.s_dim
-        
-        print(nn_params)
-        
-        nn_params = {
-            "config": nn_params,
-            "vocab_size": cfg.data.N,#len(tokenizer),
-            "schedule_conditioning": schedule_conditioning,
-        }
-        
-        return text_nn_name_dict[cfg.architecture.x0_model_class], nn_params
         
     elif cfg.architecture.x0_model_class in protein_nn_name_dict:
         nn_params = {
