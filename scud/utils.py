@@ -58,7 +58,7 @@ def get_inf_gen(forward_kwargs, num_classes):
                             4.70, 6.56, 5.34, 1.08, 2.92, 6.87] + 11*[0]) / 100 
         blosum_alphabet = np.array(list('ARNDCQEGHILKMFPSTWYVBZXJOU-'))
         tok_alphabet = np.array(tokenizer.alphabet)
-        with open('/scratch/aa11803/d3pm/data/blosum62-special-MSA.mat') as f:
+        with open('data/blosum62-special-MSA.mat') as f:
             load_matrix = np.array([line.split()[1:] for line in f if line[0] in blosum_alphabet], dtype=int)
         map_ = blosum_alphabet[:, None] == tok_alphabet[None, :]
         blosum_matrix = np.zeros((len(tok_alphabet), len(tok_alphabet)))
